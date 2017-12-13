@@ -10,18 +10,32 @@ const initialAppState = {
   inputValue: 0,
   showingResult: false,
   culcResult: (state) => state.inputValue,
+  operand: '',
   seqOpe: false,   // 演算キー連続入力
   afterResult: false,
 };
 
 const appReducer = (state = initialAppState, action) => {
-  const ope = (state, func) => {
+  const culc = (state) => {
+    switch(state.operand) {
+      case '+':
+        return state.resultValue + state.inputValue;
+      case '-':
+        return state.resultValue - state.inputValue;
+      case '*':
+        return state.resultValue * state.inputValue;
+      case '/':
+        return 1.0 * state.resultValue / state.inputValue;
+    }
+    return state.inputValue;
+  };
+  const setOpe = (state, operand) => {
     return {
       ...state,
-      resultValue: state.seqOpe ? state.resultValue : state.culcResult(state),
+      resultValue: state.seqOpe ? state.resultValue : culc(state),
       inputValue: 0,
       showingResult: true,
-      culcResult: func,
+      operand: operand,
       seqOpe: true,
       afterResult: false,
     };
@@ -36,19 +50,20 @@ const appReducer = (state = initialAppState, action) => {
       afterResult: false,
     };
   } else if (action.type === 'PLUS') {
-    return ope(state, (state) => state.resultValue + state.inputValue);
+    return setOpe(state, '+');
   } else if (action.type === 'MINUS') {
-    return ope(state, (state) => state.resultValue - state.inputValue);
+    return setOpe(state, '-');
   } else if (action.type === 'MULTI') {
-    return ope(state, (state) => state.resultValue * state.inputValue);
+    return setOpe(state, '*');
   } else if (action.type === 'DIV') {
-    return ope(state, (state) => 1.0 * state.resultValue / state.inputValue);
+    return setOpe(state, '/');
   } else if (action.type === 'RESULT') {
     return {
       ...state,
-      resultValue: state.culcResult(state),
-      inputValue: state.culcResult(state),
+      resultValue: culc(state),
+      inputValue: culc(state),
       showingResult: true,
+      operand: '',
       culcResult: (state) => state.inputValue,
       seqOpe: false,
       afterResult: true,
@@ -59,6 +74,7 @@ const appReducer = (state = initialAppState, action) => {
       resultValue: 0,
       inputValue: 0,
       showingResult: true,
+      operand: '',
       culcResult: (state) => state.inputValue,
       seqOpe: false,
       afterResult: false,
